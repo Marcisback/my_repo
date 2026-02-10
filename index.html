@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Question for You...</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        overflow: hidden; /* Prevent scrolling */
+      }
+
+      .script-font {
+        font-family: "Great Vibes", cursive;
+      }
+
+      /* Floating Hearts Animation Background */
+      .floating-heart {
+        position: absolute;
+        color: rgba(255, 182, 193, 0.6);
+        animation: float 15s infinite linear;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-10vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* Floating Photos */
+      .floating-photo {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        border-radius: 9999px;
+        object-fit: cover;
+        border: 4px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 12px 30px rgba(236, 72, 153, 0.35);
+        animation: drift 18s linear infinite;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      @keyframes drift {
+        0% {
+          transform: translateY(110vh) scale(0.9);
+          opacity: 0;
+        }
+        15% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-20vh) scale(1.05) rotate(12deg);
+          opacity: 0;
+        }
+      }
+
+      /* Fade transitions */
+      .fade-in {
+        animation: fadeIn 1.5s ease-in forwards;
+      }
+
+      .fade-out {
+        animation: fadeOut 1s ease-out forwards;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+      }
+
+      /* Heart Beat Animation */
+      .heartbeat {
+        animation: beat 1.2s infinite;
+      }
+
+      @keyframes beat {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        25% {
+          transform: scale(1.1);
+        }
+        50% {
+          transform: scale(1);
+        }
+        75% {
+          transform: scale(1.1);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-pink-100 via-red-50 p-8 to-pink-200 h-screen w-screen flex flex-col items-center justify-center relative select-none"
+  >
+    <!-- Background Decoration -->
+    <div id="hearts-container" class="absolute inset-0 overflow-hidden"></div>
+    <div id="photos-container" class="absolute inset-0 overflow-hidden"></div>
+
+    <!-- STAGE 1: The Intro / Build Up -->
+    <div
+      id="intro-card"
+      class="z-10 text-center max-w-lg p-8 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-pink-100 transition-all duration-700"
+    >
+      <h1 class="text-3xl text-pink-600 mb-6 font-semibold" id="intro-text">
+        Hey Beautiful...
+      </h1>
+      <p class="text-gray-600 mb-8 hidden" id="intro-sub">
+        I have something important to ask you.
+      </p>
+
+      <button
+        onclick="nextStep()"
+        class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 focus:outline-none ring-4 ring-pink-200"
+      >
+        Click Me
+      </button>
+    </div>
+
+    <!-- STAGE 2: The Question -->
+    <div
+      id="question-card"
+      class="hidden z-10 text-center max-w-2xl p-6 md:p-12 relative"
+    >
+      <div
+        class="text-6xl md:text-8xl text-red-500 mb-4 heartbeat drop-shadow-md"
+      >
+        ❤️
+      </div>
+
+      <h1
+        class="script-font text-5xl md:text-7xl text-pink-600 mb-4 leading-tight"
+      >
+        Will you be my Valentine?
+      </h1>
+
+      <p class="text-gray-600 mb-10 text-lg md:text-xl">
+        (I promise to buy you chocolate 🍫)
+      </p>
+
+      <div class="flex justify-center gap-4 md:gap-8 items-center h-20">
+        <!-- Yes Button -->
+        <button
+          id="yes-btn"
+          onclick="acceptProposal()"
+          class="bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-10 rounded-full shadow-lg transform transition hover:scale-110 ring-4 ring-green-200 z-20"
+        >
+          YES!
+        </button>
+
+        <!-- No Button (The Trick) -->
+        <button
+          id="no-btn"
+          onmouseover="dodgeButton()"
+          onclick="dodgeButton()"
+          class="bg-gray-400 text-white text-xl font-bold py-4 px-10 rounded-full shadow-lg transition"
+          style="transition: all 0.2s ease"
+        >
+          No
+        </button>
+      </div>
+    </div>
+
+    <!-- STAGE 3: Success -->
+    <div
+      id="success-card"
+      class="hidden z-10 text-center max-w-2xl p-8 bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border-4 border-pink-300 fade-in"
+    >
+      <h1 class="text-6xl md:text-8xl mb-4">🥰🎉</h1>
+      <h2 class="script-font text-5xl md:text-7xl text-pink-600 mb-6">
+        She said YES!
+      </h2>
+      <p class="text-xl text-gray-700 font-medium">
+        You just made me the happiest person in the world. <br />
+        I love you! ❤️
+      </p>
+      <div class="mt-8 text-sm text-gray-400">
+        Screenshot this and send it to me!
+      </div>
+    </div>
+
+    <script>
+      // --- Logic for the Proposal Flow ---
+
+      let step = 0;
+      const messages = [
+        "Hey Beautiful...",
+        "We've made so many memories...",
+        "You make me smile every single day...",
+        "So I have a question...",
+      ];
+
+      const introCard = document.getElementById("intro-card");
+      const introText = document.getElementById("intro-text");
+      const introSub = document.getElementById("intro-sub");
+      const questionCard = document.getElementById("question-card");
+      const successCard = document.getElementById("success-card");
+      const noBtn = document.getElementById("no-btn");
+      const yesBtn = document.getElementById("yes-btn");
+
+      let yesScale = 1;
+
+      // Initial setup for the No button to sit next to Yes initially
+      // We use absolute positioning for the dodge effect, so we need to set initial relative position logic
+      // But for simplicity in "dodging", we will switch it to absolute upon first hover.
+
+      function nextStep() {
+        step++;
+
+        // Text fade out
+        introText.classList.add("fade-out");
+
+        setTimeout(() => {
+          if (step < messages.length) {
+            // Update text and fade in
+            introText.innerText = messages[step];
+            introText.classList.remove("fade-out");
+            introText.classList.add("fade-in");
+          } else {
+            // Transition to Question Card
+            introCard.classList.add("hidden");
+            questionCard.classList.remove("hidden");
+            questionCard.classList.add("fade-in");
+
+            // Position the No button relatively first, then make it tricky
+            // Just keeping it in flow for now
+          }
+        }, 500); // Wait for fade out
+      }
+
+      // The "No" button dodge logic
+      function dodgeButton() {
+        // Make Yes button bigger every time she tries to click No
+        yesScale += 0.2;
+        yesBtn.style.transform = `scale(${yesScale})`;
+
+        const maxX = window.innerWidth - noBtn.offsetWidth - 50;
+        const maxY = window.innerHeight - noBtn.offsetHeight - 50;
+
+        const randomX = Math.random() * maxX;
+        const randomY = Math.random() * maxY;
+
+        noBtn.style.position = "absolute"; // Ensure it breaks out of flex flow
+        noBtn.style.left = randomX + "px";
+        noBtn.style.top = randomY + "px";
+      }
+
+      // The "Yes" logic
+      function acceptProposal() {
+        // Hide question, show success
+        questionCard.classList.add("hidden");
+        successCard.classList.remove("hidden");
+
+        // Launch Confetti
+        launchConfetti();
+
+        // Play a little continuous celebration loop
+        let duration = 5 * 1000;
+        let animationEnd = Date.now() + duration;
+
+        let interval = setInterval(function () {
+          let timeLeft = animationEnd - Date.now();
+          if (timeLeft <= 0) {
+            return clearInterval(interval);
+          }
+          launchConfetti();
+        }, 300);
+      }
+
+      function launchConfetti() {
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 },
+          colors: ["#ff69b4", "#ff0000", "#ffffff"],
+          shapes: ["heart"], // Using heart shapes for confetti
+        });
+      }
+
+      // --- Background Floating Hearts Logic ---
+      function createFloatingHeart() {
+        const heart = document.createElement("div");
+        heart.classList.add("floating-heart");
+        heart.innerHTML = "❤️";
+
+        // Randomize properties
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.fontSize = Math.random() * 20 + 10 + "px";
+        heart.style.animationDuration = Math.random() * 10 + 10 + "s"; // 10-20s duration
+
+        document.getElementById("hearts-container").appendChild(heart);
+
+        // Cleanup after animation
+        setTimeout(() => {
+          heart.remove();
+        }, 20000);
+      }
+
+      // --- Floating Photos Logic ---
+      const photoSources = [
+        // Add as many photos as you want here.
+        "images/me.jpg",
+        "images/girlfriend.jpg",
+      ];
+      const maxPhotosOnScreen = 12;
+
+      function createFloatingPhoto() {
+        const photo = document.createElement("img");
+        photo.classList.add("floating-photo");
+        photo.src = photoSources[Math.floor(Math.random() * photoSources.length)];
+        photo.alt = "Floating memory";
+
+        // Randomize properties
+        photo.style.left = Math.random() * 100 + "vw";
+        photo.style.animationDuration = Math.random() * 10 + 14 + "s";
+        photo.style.animationDelay = Math.random() * 2 + "s";
+
+        const photosContainer = document.getElementById("photos-container");
+
+        if (photosContainer.children.length >= maxPhotosOnScreen) {
+          photosContainer.removeChild(photosContainer.firstElementChild);
+        }
+
+        photosContainer.appendChild(photo);
+
+        // Cleanup after animation
+        setTimeout(() => {
+          photo.remove();
+        }, 24000);
+      }
+
+      // Create a heart every 500ms
+      setInterval(createFloatingHeart, 500);
+
+      // Create a photo every 3s
+      setInterval(createFloatingPhoto, 3000);
+    </script>
+  </body>
+</html>
